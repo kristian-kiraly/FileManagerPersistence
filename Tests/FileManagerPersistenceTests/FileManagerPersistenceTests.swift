@@ -66,6 +66,39 @@ final class FileManagerPersistenceTests: XCTestCase {
         XCTAssertEqual(testArr, result)
     }
     
+    func testPersistenceBuiltInVarDict() throws {
+        let testDict = [
+            "test1" : 42,
+            "test2" : 43
+        ]
+        let testPath = FileManager.documentsPathWithAppending(path: "TestPath")
+        FileManager.trySavingDictionary(dict: testDict, toPath: testPath)
+        let result = FileManager.tryLoadingDictionary(fromPath: testPath, defaultValue: ["test0" : -1])
+        XCTAssertEqual(testDict, result)
+    }
+    
+    func testPersistenceCustomStructDict() throws {
+        let testDict = [
+            "test1" : TestStruct(value: 42),
+            "test2" : TestStruct(value: 43)
+        ]
+        let testPath = FileManager.documentsPathWithAppending(path: "TestPath")
+        FileManager.trySavingDictionary(dict: testDict, toPath: testPath)
+        let result = FileManager.tryLoadingDictionary(fromPath: testPath, defaultValue: ["test0" : TestStruct(value: -1)])
+        XCTAssertEqual(testDict, result)
+    }
+    
+    func testPersistenceCustomClassDict() throws {
+        let testDict = [
+            "test1" : TestClass(value: 42),
+            "test2" : TestClass(value: 43)
+        ]
+        let testPath = FileManager.documentsPathWithAppending(path: "TestPath")
+        FileManager.trySavingDictionary(dict: testDict, toPath: testPath)
+        let result = FileManager.tryLoadingDictionary(fromPath: testPath, defaultValue: ["test0" : TestClass(value: -1)])
+        XCTAssertEqual(testDict, result)
+    }
+    
     func testPersistenceTest() throws {
         let testVar = 42
         let testVarFail = -1

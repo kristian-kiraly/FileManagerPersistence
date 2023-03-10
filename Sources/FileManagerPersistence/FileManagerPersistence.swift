@@ -37,6 +37,29 @@ public extension FileManager {
         }
     }
     
+    static func trySavingDictionary<T:Codable, U:Hashable & Codable>(dict:[U : T], toPath path:URL) {
+        do {
+            let data = try JSONEncoder().encode(dict)
+            try data.write(to: path, options: [.atomic, .completeFileProtection])
+        } catch let error {
+            print("Unable to save dictionary to path: \(path.absoluteString)")
+            print(error.localizedDescription)
+        }
+    }
+    
+    static func tryLoadingDictionary<T:Codable, U:Hashable & Codable>(fromPath path:URL, defaultValue:[U : T]) -> [U : T] {
+        var result:[U : T]
+        do {
+            let data = try Data(contentsOf: path)
+            result = try JSONDecoder().decode([U : T].self, from: data)
+            return result
+        } catch let error {
+            print("Unable to load dictionary from path: \(path.absoluteString)")
+            print(error.localizedDescription)
+            return defaultValue
+        }
+    }
+    
     static func trySavingVariable<T:Codable>(value:T, toPath path:URL) {
         do {
             let data = try JSONEncoder().encode(value)
