@@ -14,7 +14,7 @@ public extension FileManager {
         }
     }
     
-    static func trySavingList<T:Codable>(list:[T], toPath path:URL) {
+    static func trySavingList<T:Encodable>(list:[T], toPath path:URL) {
         do {
             let data = try JSONEncoder().encode(list)
             try data.write(to: path, options: [.atomic, .completeFileProtection])
@@ -24,7 +24,7 @@ public extension FileManager {
         }
     }
     
-    static func tryLoadingList<T:Codable>(fromPath path:URL, defaultValue:[T]) -> [T] {
+    static func tryLoadingList<T:Decodable>(fromPath path:URL, defaultValue:[T]) -> [T] {
         var result:[T]
         do {
             let data = try Data(contentsOf: path)
@@ -37,7 +37,7 @@ public extension FileManager {
         }
     }
     
-    static func trySavingDictionary<T:Codable, U:Hashable & Codable>(dict:[U : T], toPath path:URL) {
+    static func trySavingDictionary<T:Encodable, U:Hashable & Encodable>(dict:[U : T], toPath path:URL) {
         do {
             let data = try JSONEncoder().encode(dict)
             try data.write(to: path, options: [.atomic, .completeFileProtection])
@@ -47,7 +47,7 @@ public extension FileManager {
         }
     }
     
-    static func tryLoadingDictionary<T:Codable, U:Hashable & Codable>(fromPath path:URL, defaultValue:[U : T]) -> [U : T] {
+    static func tryLoadingDictionary<T:Decodable, U:Hashable & Decodable>(fromPath path:URL, defaultValue:[U : T]) -> [U : T] {
         var result:[U : T]
         do {
             let data = try Data(contentsOf: path)
@@ -60,7 +60,7 @@ public extension FileManager {
         }
     }
     
-    static func trySavingVariable<T:Codable>(value:T, toPath path:URL) {
+    static func trySavingVariable<T:Encodable>(value:T, toPath path:URL) {
         do {
             let data = try JSONEncoder().encode(value)
             try data.write(to: path, options: [.atomic, .completeFileProtection])
@@ -70,7 +70,7 @@ public extension FileManager {
         }
     }
     
-    static func tryLoadingVariable<T:Codable>(fromPath path:URL, defaultValue:T) -> T {
+    static func tryLoadingVariable<T:Decodable>(fromPath path:URL, defaultValue:T) -> T {
         var result:T
         do {
             let data = try Data(contentsOf: path)
@@ -81,5 +81,62 @@ public extension FileManager {
             print(error.localizedDescription)
             return defaultValue
         }
+    }
+}
+
+public extension Encodable {
+    func trySavingToDocumentsWithAppending(appending:String) {
+        let path = FileManager.documentsPathWithAppending(path: appending)
+        trySavingToPath(path: path)
+    }
+    
+    func trySavingToPath(path:String) {
+        guard let pathURL = URL(string: path) else {
+            print("Failed to create URL from path string: \(path)")
+            return
+        }
+        trySavingToPath(path: pathURL)
+    }
+    
+    func trySavingToPath(path:URL) {
+        FileManager.trySavingVariable(value: self, toPath: path)
+    }
+}
+
+public extension Array where Element: Encodable {
+    func trySavingToDocumentsWithAppending(appending:String) {
+        let path = FileManager.documentsPathWithAppending(path: appending)
+        trySavingToPath(path: path)
+    }
+    
+    func trySavingToPath(path:String) {
+        guard let pathURL = URL(string: path) else {
+            print("Failed to create URL from path string: \(path)")
+            return
+        }
+        trySavingToPath(path: pathURL)
+    }
+    
+    func trySavingToPath(path:URL) {
+        FileManager.trySavingList(list: self, toPath: path)
+    }
+}
+
+public extension Dictionary where Key: Hashable & Encodable, Value: Encodable {
+    func trySavingToDocumentsWithAppending(appending:String) {
+        let path = FileManager.documentsPathWithAppending(path: appending)
+        trySavingToPath(path: path)
+    }
+    
+    func trySavingToPath(path:String) {
+        guard let pathURL = URL(string: path) else {
+            print("Failed to create URL from path string: \(path)")
+            return
+        }
+        trySavingToPath(path: pathURL)
+    }
+    
+    func trySavingToPath(path:URL) {
+        FileManager.trySavingDictionary(dict: self, toPath: path)
     }
 }
