@@ -1,11 +1,11 @@
 import XCTest
 @testable import FileManagerPersistence
 
-struct TestStruct:Codable, Equatable {
+struct TestStruct: Codable, Equatable, Hashable {
     var value:Int
 }
 
-class TestClass:Codable, Equatable {
+class TestClass: Codable, Equatable, Hashable {
     var value:Int
     
     init(value: Int) {
@@ -14,6 +14,10 @@ class TestClass:Codable, Equatable {
     
     static func == (lhs: TestClass, rhs: TestClass) -> Bool {
         lhs.value == rhs.value
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(value)
     }
 }
 
@@ -141,6 +145,27 @@ final class FileManagerPersistenceTests: XCTestCase {
         testDict.trySavingToDocumentsWithAppending(appending: pathAppending)
         let result2 = FileManager.tryLoadingDictionary(fromPath: testPath, defaultValue: [testFailedKey : TestClass(value: testFailedValue)])
         XCTAssertEqual(testDict, result2)
+    }
+    
+    func testPersistenceBuiltInVarSet() throws {
+        let testSet: Set = [testValue1, testValue2]
+        try testSet.saveWithFilename(filename: pathAppending)
+        let result: Set<Int> = try .init(filename: pathAppending)
+        XCTAssertEqual(testSet, result)
+    }
+    
+    func testPersistenceCustomStructSet() throws {
+        let testSet: Set = [TestStruct(value: testValue1), TestStruct(value: testValue2)]
+        try testSet.saveWithFilename(filename: pathAppending)
+        let result: Set<TestStruct> = try .init(filename: pathAppending)
+        XCTAssertEqual(testSet, result)
+    }
+    
+    func testPersistenceCustomClassSet() throws {
+        let testSet: Set = [TestClass(value: testValue1), TestClass(value: testValue2)]
+        try testSet.saveWithFilename(filename: pathAppending)
+        let result: Set<TestClass> = try .init(filename: pathAppending)
+        XCTAssertEqual(testSet, result)
     }
     
     func testPersistenceTest() throws {
