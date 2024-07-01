@@ -154,8 +154,15 @@ public extension Encodable {
     }
     
     func saveToDocumentsWithAppending(appending: String) throws {
-        let path = FileManager.documentsPathWithAppending(path: appending)
-        try saveToPath(path: path)
+        try saveToPath(path: urlToDocumentsWithAppending(appending: appending))
+    }
+    
+    func urlForFilename(filename: String) -> URL {
+        urlToDocumentsWithAppending(appending: filename)
+    }
+    
+    func urlToDocumentsWithAppending(appending: String) -> URL {
+        FileManager.documentsPathWithAppending(path: appending)
     }
     
     func saveToPath(path: String) throws {
